@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Impresion de ticket{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div>Imprimiendo el documento...</div>
+    <div>Revise la impresora: {{default_printer}} </div>
+    <h5>Impresoras disponibles: </h5>
+    <ul>
+        {% for printer in printers_list %}
+            <li>{{printer}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
