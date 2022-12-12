@@ -5,11 +5,11 @@ from flask import session
 from flask import redirect
 from flask import url_for, flash
 
-from app.models import Usuarios
+from app.models import Usuarios, Elementos
 from app.models import Notificaciones
 from flask_sqlalchemy import SQLAlchemy
-from app.admin.elemento import Elemento
 from app.admin.usuario import Usuario
+from app.admin.elemento import Elemento
 
 db = SQLAlchemy()
 admin = Blueprint('admin', __name__)
@@ -17,20 +17,39 @@ admin = Blueprint('admin', __name__)
 @admin.route('/')
 def root():
     loggedIn, firstName, noOfItems = getLoginDetails()
-    return render_template('index.html', itemData=[], loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=[])
+
+    itemData = Elementos.query.filter(Elementos.trocador != session['id']).all()
+    print("itemData")
+    print(itemData)
+    if len(itemData) > 9:
+        itemData = itemData[0:9]
+        print(itemData)
+    print('loggedIn')
+    print(loggedIn)
+    return render_template('index.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+
+    # return render_template('index.html', itemData=[], loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=[])
 
 @admin.route("/login", methods = ['POST', 'GET'])
 def login():
     error = ''
     if request.method == 'POST':
-        email = request.form['inputEmail']
-        password = request.form['inputPassword']
-        usuario = Usuarios.query.filter(Usuarios.email == email,
-                                       Usuarios.contrasena == password).first()
+        us = Usuario(
+            email=request.form['inputEmail'],
+            contrasena=request.form['inputPassword']
+        )
+        usuario = Usuarios.query.filter(
+            Usuarios.email == us.get_email(),
+            Usuarios.contrasena == us.validar_hash()
+        ).first()
         db.session.commit()
 
         if usuario:
-            session['email'] = email
+            session['email'] = usuario.email
+            session['id'] = usuario.id
+            print("session['id']")
+            print(session['id'])
+
             return redirect(url_for('admin.root'))
         else:
             error = 'Invalid UserId / Password'
@@ -52,37 +71,32 @@ def register():
     error = ''
     if request.method == 'POST':
         try:
+
             usuario = Usuario(request.form['nombre'],
                               request.form['email'],
                               request.form['password'],
                               request.form['departamento'],
                               request.form['municipio'],
                               request.form['direccion'])
-            # usuario.set_nombre(request.form['usuario'])
-            # usuario.set_email(request.form['email'])
-            # usuario.set_contrasena(request.form['contrasena'])
-            # usuario.set_departamento(request.form['departamento'])
-            # usuario.set_municipio(request.form['municipio'])
-            # usuario.set_direccion(request.form['direccion'])
+
+            password = usuario.encriptar_clave(request.form['cpassword'])
 
             nuevo_usuario = Usuarios(
                     nombre=usuario.get_nombre(),
                     email=usuario.get_email(),
-                    contrasena=usuario.get_contrasena(),
+                    contrasena=password,
                     departamento=usuario.get_departamento(),
                     municipio=usuario.get_municipio(),
-                    direccion=usuario.get_direccion()
-            )
+                    direccion=usuario.get_direccion())
+
+            # Usuarios.insertar(nuevo_usuario)
             db.session.add(nuevo_usuario)
             db.session.commit()
+            #
             flash("Registered Successfully")
         except Exception as e:
             print(e)
             return {"mensaje": f"Error {e}"}
-
-
-
-
 
         # try:
         #     existe = Usuarios.query.filter(Usuarios.email == request.form['email']).first()
@@ -113,11 +127,7 @@ def register():
 def profileForm():
     if 'email' not in session:
         return redirect(url_for('admin.loginForm'))
-    # with sqlite3.connect('database.db') as conn:
-    #     cur = conn.cursor()
-    #     cur.execute("SELECT userId, email, firstName, lastName, phone FROM users WHERE email = ?", (session['email'], ))
-    #     profileData = cur.fetchone()
-    # conn.close()
+
     return render_template("profile.html", profileData='profileData')
 
 @admin.route("/logout")
@@ -133,57 +143,142 @@ def getLoginDetails():
         firstName = ''
         noOfItems = 0
     else:
+        print(session['email'])
         loggedIn = True
         usuario = Usuarios.query.filter(Usuarios.email == session['email']).first()
-        firstName = usuario.nombre
-        notificacion = Notificaciones.query.filter(Notificaciones.usuario_pujador == usuario.id).first()
-        # userId, firstName = cur.fetchone()
-        # cur.execute("SELECT count(productId) FROM kart WHERE userId = ?", (userId, ))
-        noOfItems = 3 # notificaciones futuras
+        if usuario is None:
+            loggedIn = False
+            firstName = ''
+            noOfItems = 0
+        else:
+            firstName = usuario.nombre
+            print("usuario")
+            print(usuario)
+            notificacion = Notificaciones.query.filter(Notificaciones.usuario_pujador == usuario.id).first()
+            noOfItems = 3 # notificaciones futuras
 
     return (loggedIn, firstName, noOfItems)
 
 
-@admin.route("/addItem", methods=["GET", "POST"])
-def addItem():
-    if request.method == "POST":
-        elemento = Elemento(
-            request.form['name'],
-        )
-
-
-        print(request.form)
-        name = request.form['name']
-        price = float(request.form['price'])
-        description = request.form['description']
-        stock = int(request.form['stock'])
-        categoryId = int(request.form['category'])
-
-        #Uploading image procedure
-        image = request.files['image']
-        # if image and allowed_file(image.filename):
-        #     filename = secure_filename(image.filename)
-        #     image.save(os.path.join(UPLOAD_FOLDER, filename))
-        # imagename = filename
-        # with sqlite3.connect('database.db') as conn:
-        #     try:
-        #         cur = conn.cursor()
-        #         cur.execute('''INSERT INTO products (name, price, description, image, stock, categoryId) VALUES (?, ?, ?, ?, ?, ?)''', (name, price, description, imagename, stock, categoryId))
-        #         conn.commit()
-        #         msg="added successfully"
-        #     except:
-        #         msg="error occured"
-        #         conn.rollback()
-        # conn.close()
-        # print(msg)
-        return redirect(url_for('admin.root'))
-
 
 @admin.route("/add")
 def add():
-    # with sqlite3.connect('database.db') as conn:
-    #     cur = conn.cursor()
-    #     cur.execute("SELECT categoryId, name FROM categories")
-    #     categories = cur.fetchall()
-    # conn.close()
-    return render_template('add.html', categories=list())
+    loggedIn, firstName, noOfItems = getLoginDetails()
+    return render_template('addEditElement.html', categories=list(),  loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+
+@admin.route('/myElements')
+def myElements():
+    loggedIn, firstName, noOfItems = getLoginDetails()
+
+    itemData = Elementos.query.filter(
+            Elementos.trocador == session['id']
+        ).all()
+    print(itemData)
+    existItem = True
+    if len(itemData) == 0:
+        existItem = False
+    else:
+        itemData = itemData[0:9]
+        print(itemData)
+    return render_template('elements.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
+                           noOfItems=noOfItems, existItem=existItem)
+
+@admin.route("/addElement", methods=["GET", "POST"])
+def addElement():
+    if request.method == "POST":
+
+        nombre = request.form['nombre']
+
+        print("session['id']")
+        print(session['id'])
+
+        el = Elemento(
+            nombre=request.form['nombre'],
+            precio_estimado=float(request.form['precio_estimado']),
+            descripcion = request.form['descripcion'],
+            categoria = 5,
+            imagen_url = request.files['imagen_url'],
+            trocador=session['id']
+            )
+
+        nuevo_elemento = Elementos(
+            nombre=el.get_nombre(),
+            precio_estimado=el.get_precio_estimado(),
+            descripcion=el.get_descripcion(),
+            imagen_url=el.get_imagen_url(),
+            categoria=el.get_categoria(),
+            trocador=el.get_trocador()
+        )
+        # Elementos.insertar(nuevo_usuario)
+        db.session.add(nuevo_elemento)
+        db.session.commit()
+
+        flash("Elemento creado correctamente")
+    return redirect(url_for('admin.root'))
+
+@admin.route("/saveElement", methods=["GET", "POST"])
+def saveElement():
+    if request.method == "POST":
+
+        print("session['id']")
+        print(session['id'])
+
+        el = Elemento(
+            nombre=request.form['nombre'],
+            precio_estimado=float(request.form['precio_estimado']),
+            descripcion = request.form['descripcion'],
+            categoria = 5,
+            imagen_url = request.files['imagen_url'],
+            trocador=session['id']
+            )
+        db.session.query(Elementos)\
+            .filter(Elementos.id == request.form['id'])\
+            .update({
+                Elementos.nombre:el.get_nombre(),
+                Elementos.precio_estimado:el.get_precio_estimado(),
+                Elementos.descripcion:el.get_descripcion(),
+                Elementos.imagen_url:el.get_imagen_url(),
+                Elementos.categoria:el.get_categoria(),
+                Elementos.trocador:el.get_trocador()
+        }, synchronize_session=False)
+        db.session.commit()
+        flash("Elemento editado correctamente")
+    return redirect(url_for('admin.myElements'))
+
+@admin.route('/editElement/<int:elementId>')
+def editElements(elementId):
+    loggedIn, firstName, noOfItems = getLoginDetails()
+
+    itemData2 = Elementos.query.filter(
+            Elementos.id == elementId
+    ).all()
+    db.session.commit()
+    print('aqui')
+    print(elementId)
+    print(itemData2)
+
+    existItem = True
+    if len(itemData2) == 0:
+        existItem = False
+        itemData=[]
+    else:
+        itemData= itemData2[0]
+    return render_template('addEditElement.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
+                           noOfItems=noOfItems, existItem=existItem)
+@admin.route("/pujar/<int:elementId>")
+def pujar(elementId):
+    if 'email' not in session:
+        return redirect(url_for('loginForm'))
+    loggedIn, firstName, noOfItems = getLoginDetails()
+    email = session['email']
+
+    products = Elementos.query.filter(
+        Elementos.id == elementId
+    ).all()
+    totalPrice = 0
+    print(products)
+    existItem = False
+    if noOfItems > 0:
+        existItem = True
+    return render_template("pujar.html", products = products, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+

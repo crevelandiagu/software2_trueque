@@ -1,10 +1,16 @@
 from typing import Any
-
+import hashlib
 
 class Usuario:
 
     # class variable shared by all instances
-    def __init__(self,nombre,email,contrasena,departamento,municipio,direccion):
+    def __init__(self,
+                 nombre=None,
+                 email=None,
+                 contrasena=None,
+                 departamento=None,
+                 municipio=None,
+                 direccion=None):
         self.__nombre = nombre
         self.__email = email
         self.__contrasena = contrasena
@@ -29,6 +35,22 @@ class Usuario:
 
     def get_direccion(self):
         return self.__direccion
+
+    def encriptar_clave(self, contrasena):
+        if self.__contrasena != contrasena:
+            return False
+        else:
+            m = hashlib.sha256()
+            m.update(bytes(self.__contrasena, encoding='utf-8'))
+            return m.hexdigest()
+
+    def validar_hash(self):
+        m = hashlib.sha256()
+        m.update(bytes(self.__contrasena, encoding='utf-8'))
+        return m.hexdigest()
+
+
+
 
     # def set_nombre(self, nombre):
     #     self.__nombre = nombre

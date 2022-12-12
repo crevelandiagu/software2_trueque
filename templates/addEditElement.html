@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block head %}
+<style>
+    #images{
+        display:flex;
+        flex-direction:row;
+    }
+
+    #image{
+
+        overflow:hidden;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    .container{
+        max-width: 1520px;
+    }
+    body {
+        min-height: 75rem;
+    }
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+    }
+
+    #description {
+        overflow:hidden;
+        text-overflow: ellipsis;
+        height:80px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    {% if existItem %}
+                    <form class="form-signin"  action="/saveElement" method="POST" enctype="multipart/form-data">
+                        <input type="text" id="id" name="id" type="hidden"   value="{{itemData.id}}" required>
+                        <div class="form-label-group">
+                         <label for="firstName">Nombre</label>
+                            <input type="text" id="firstName" name="nombre" class="form-control"   value="{{itemData.nombre}}" required>
+                        </div>
+                        <div class="form-label-group">
+                            <label for="price">Precio Estimado</label>
+                            <input type="text" id="price" name="precio_estimado" class="form-control" value="{{itemData.precio_estimado}}" required>
+
+                        </div>
+                        <div class="form-label-group">
+                            <label for="descripcion">Descripcion</label>
+                            <input type="text" id="description" name="descripcion" class="form-control"value="{{itemData.descripcion}}"  required>
+
+                        </div>
+
+                        <div class="form-label-group">
+                             <label class="form-label" for="customFile">Seleccione la imagen</label>
+                            <input type="file" id="image" name="imagen_url" value="{{itemData.imagen_url}}"/>
+                        </div>
+
+                      <br>
+                        <button class="btn btn-lg btn-danger btn-block" type="submit">Enviar</button>
+                    </form>
+                    {% else %}
+                     <form class="form-signin"  action="/addElement" method="POST" enctype="multipart/form-data">
+
+                        <div class="form-label-group">
+                         <label for="firstName">Nombre</label>
+                            <input type="text" id="firstName" name="nombre" class="form-control" placeholder="Nombre elemento" required>
+                        </div>
+                        <div class="form-label-group">
+                            <label for="price">Precio Estimado</label>
+                            <input type="text" id="price" name="precio_estimado" class="form-control" placeholder="Precio estimado del mercado" required>
+
+                        </div>
+                        <div class="form-label-group">
+                            <label for="descripcion">Descripcion</label>
+                            <input type="text" id="description" name="descripcion" class="form-control" placeholder="Descripcion elemento" required>
+
+                        </div>
+{#                        <div class="form-label-group">#}
+{#                            <label for="sock">Categoria</label>#}
+{#                            <input type="text" id="stock" name="stock" class="form-control" placeholder="stock" required>#}
+{#                        </div>#}
+                        <div class="form-label-group">
+                             <label class="form-label" for="customFile">Seleccione la imagen</label>
+                            <input type="file" id="image" name="imagen_url"/>
+                        </div>
+{#                        <div class="form-label-group">#}
+{#                            <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">#}
+{#                                {% for row in categories %}#}
+{#                                    <option value="{{row[0]}}">{{row[1]}}</option>#}
+{#                                {% endfor %}#}
+{#                            </select>#}
+{#                        </div>#}
+                      <br>
+                        <button class="btn btn-lg btn-danger btn-block" type="submit">Enviar</button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="col-md-3"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

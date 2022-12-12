@@ -34,45 +34,42 @@
           font-size: 3.5rem;
         }
     }
-
-    #description {
-        overflow:hidden;
-        text-overflow: ellipsis;
-        height:80px;
-    }
 </style>
 {% endblock %}
 {% block content %}
     <div class="container">
         <div class="jumbotron bg-light">
-            <h1>{{categoryName}}</h1>
-            <p class="lead">ShoppingMore selected the most popular categories for you.</p>
-            <a class="btn btn-lg btn-danger" href="/" role="button">View Quality Goods &raquo;</a>
+            <h1>MY CART</h1>
+            <h3 class="lead">Total Cost: <span class="text-danger">￥{{totalPrice}}</span></h3>
+            <a class="btn btn-lg btn-danger" href="/newAllOrder" role="button">Buy ALL &raquo;</a>
         </div>
     </div>
     {% if existItem %}
     <div class="album py-5 bg-light">
         <div class="container">
             <div class="row">
-                {% for data in itemData %}
+                {% for data in products %}
                 <div class="col-md-3">
                     <div class="card mb-4 shadow-sm">
                         <div id="images">
                                 <div id="image">
-                                    <img src={{url_for('static', filename='uploads/' + data[1]) }} id="itemImage"/>
+                                    <img src={{url_for('static', filename='uploads/' + data.imagen_url) }} id="itemImage"/>
                                 </div>
                             </div>
                         <div class="card-body">
-                            <h4 class="card-text text-danger">{{data[1]}}</h4>
-                            <div id="description">
-                                <p class="card-text text-muted">{{data[3]}}</p>
+                            <h4 class="card-text text-danger">{{data.nombre}}</h4>
+                            <h6 class="card-text text-danger">cop {{data.precio_estimado}}</h6>
+{#                            <h6 class="card-text text-muted">× {{data[4]}}</h6>#}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p> </p>
+                                <p class="text-danger" style="font-size:150%">cop {{data.precio_estimado}}</p>
                             </div>
-                            <h6 class="card-text text-muted">Stock: {{data[5]}}</h6>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <a type="button" class="btn btn-sm btn-outline-danger" href="/addToCart?productId={{data[0]}}">Add to Cart</a>
+                                    <a type="button" class="btn btn-sm btn-outline-danger" href="/addToCart?productId={{data.id}}"> + </a>
+                                    <a type="button" class="btn btn-sm btn-outline-danger" href="/removeFromCart?productId={{data.id}}"> − </a>
                                 </div>
-                                <p class="text-danger" style="font-size:150%">COP{{data.}}</p>
+                                <a class="btn btn-danger" href="/newOrder?productId={{data[0]}}" role="button"> &raquo;</a>
                             </div>
                         </div>
                     </div>
