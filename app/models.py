@@ -1,8 +1,6 @@
 import datetime
-from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-
 db = SQLAlchemy()
 
 
@@ -10,17 +8,37 @@ class Usuarios(db.Model):
 
     __tablename__ = 'usuarios'
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre: str = db.Column(db.String(150), unique=True, nullable=False)
+    nombre: str = db.Column(db.String(150), nullable=False)
     email: str = db.Column(db.String(150), unique=True, nullable=False)
-    contrasena: str = db.Column(db.Text, nullable=False)
-    departamento: str = db.Column(db.String(150), unique=True, nullable=False)
-    municipio: str = db.Column(db.String(150), unique=True, nullable=False)
+    contrasena: str = db.Column(db.String(250), nullable=False,  unique=True,)
+    departamento: str = db.Column(db.String(150), nullable=False)
+    municipio: str = db.Column(db.String(150), nullable=False)
     direccion: str = db.Column(db.String(150), unique=True, nullable=False)
     # Relationships
-    elemento = db.relationship('Elementos', cascade='all, delete, delete-orphan')
+    # elemento = db.relationship('Elementos', cascade='all, delete, delete-orphan')
     # notificacion = db.relationship('Notificaciones', cascade='all, delete, delete-orphan')
 
-class Trueques(db.Model, UserMixin):
+    def __init__(self, id: int = None,
+                 nombre=None,
+                 email=None,
+                 contrasena=None,
+                 departamento=None,
+                 municipio=None,
+                 direccion=None):
+        self.id = id
+        self.nombre = nombre
+        self.email = email
+        self.contrasena = contrasena
+        self.departamento = departamento
+        self.municipio = municipio
+        self.direccion = direccion
+
+    def insertar(self):
+        db.session.add(self.__init__)
+        db.session.commit()
+
+
+class Trueques(db.Model):
 
     __tablename__ = 'trueques'
 
@@ -50,10 +68,11 @@ class Elementos(db.Model):
     __tablename__ = 'elementos'
 
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre: str = db.Column(db.String(50), unique=True, nullable=False)
-    descripcion: str = db.Column(db.String(250), unique=True, nullable=False)
-    imagen_url: str = db.Column(db.String(150), unique=True, nullable=False)
-    categoria: str = db.Column(db.String(50), unique=True, nullable=False)
+    nombre: str = db.Column(db.String(50), nullable=False)
+    descripcion: str = db.Column(db.String(250), nullable=False)
+    imagen_url: str = db.Column(db.String(150), nullable=False)
+    categoria: str = db.Column(db.String(50), nullable=False)
+    precio_estimado: int = db.Column(db.Integer, )
     trocador: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
     created_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
