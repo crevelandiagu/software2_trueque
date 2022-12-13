@@ -36,8 +36,8 @@
     <body>
         <form class="form-signin" action="/register" method="POST" onsubmit="return validate()">
             <div class="text-center mb-4">
-                <img class="mb-4" src="static/img/logo-rojo.png" alt="" width="72" height="72">
-                <h1 class="h3 mb-3 font-weight-normal">Registrese  Truques Tundama</h1>
+                <img class="mb-4" src="{{ url_for('static', filename = 'img/logo-rojo.png') }}" alt="" width="72" height="72" >
+                <h1 class="h3 mb-3 font-weight-normal">Registrese  Trueques Tundama</h1>
             </div>
 
             <div class="form-label-group">
@@ -114,8 +114,8 @@
                 <h5 class="h6 mb-3 font-weight-bold text-danger">{{error}}</h5>
             </div>
 
-            <button class="btn btn-lg btn-danger btn-block" type="submit" id="registro">Registrarse</button>
-            <p class="mt-5 mb-3 text-muted text-center">&copy; 2017-2019</p>
+            <button class="btn btn-lg btn-danger btn-block" type="submit" id="aceptar_registro">Aceptar</button>
+            <p class="mt-5 mb-3 text-muted text-center">&copy; 2022</p>
         </form>
     </body>
 </html>

@@ -13,7 +13,7 @@ class Usuarios(db.Model):
     contrasena: str = db.Column(db.String(250), nullable=False,  unique=True,)
     departamento: str = db.Column(db.String(150), nullable=False)
     municipio: str = db.Column(db.String(150), nullable=False)
-    direccion: str = db.Column(db.String(150), unique=True, nullable=False)
+    direccion: str = db.Column(db.String(150), nullable=False)
     # Relationships
     # elemento = db.relationship('Elementos', cascade='all, delete, delete-orphan')
     # notificacion = db.relationship('Notificaciones', cascade='all, delete, delete-orphan')
@@ -72,14 +72,12 @@ class Elementos(db.Model):
     descripcion: str = db.Column(db.String(250), nullable=False)
     imagen_url: str = db.Column(db.String(150), nullable=False)
     categoria: str = db.Column(db.String(50), nullable=False)
-    precio_estimado: int = db.Column(db.Integer, )
+    precio_estimado: int = db.Column(db.Integer)
     trocador: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
+    estado: str = db.Column(db.String(50), nullable=False, default="sin-asignar")
     created_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
                                      onupdate=datetime.datetime.now)
-
-
-
 
 class SolicitudLogistica(db.Model):
 
