@@ -313,7 +313,5 @@ def savePuja():
         # Elementos.insertar(nuevo_usuario)
         db.session.add(nuevo_trueque)
         db.session.commit()
-
-        db.session.commit()
         flash("puja enviada correctamente")
     return redirect(url_for('admin.root'))
