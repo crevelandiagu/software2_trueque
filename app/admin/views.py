@@ -5,11 +5,12 @@ from flask import session
 from flask import redirect
 from flask import url_for, flash
 
-from app.models import Usuarios, Elementos
+from app.models import Usuarios, Elementos, Trueques
 from app.models import Notificaciones
 from flask_sqlalchemy import SQLAlchemy
 from app.admin.usuario import Usuario
 from app.admin.elemento import Elemento
+from app.admin.trueque import Trueque
 
 db = SQLAlchemy()
 admin = Blueprint('admin', __name__)
@@ -18,14 +19,14 @@ admin = Blueprint('admin', __name__)
 def root():
     loggedIn, firstName, noOfItems = getLoginDetails()
 
-    itemData = Elementos.query.filter(Elementos.trocador != session['id']).all()
-    print("itemData")
-    print(itemData)
+    itemData = Elementos.query.filter(
+        Elementos.trocador != session.get('id',-1),
+        Elementos.estado != 'sin-asignar'
+    ).all()
+
     if len(itemData) > 9:
         itemData = itemData[0:9]
         print(itemData)
-    print('loggedIn')
-    print(loggedIn)
     return render_template('index.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
 
     # return render_template('index.html', itemData=[], loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=[])
@@ -171,7 +172,8 @@ def myElements():
     loggedIn, firstName, noOfItems = getLoginDetails()
 
     itemData = Elementos.query.filter(
-            Elementos.trocador == session['id']
+            Elementos.trocador == session['id'],
+            Elementos.estado == 'sin-asignar'
         ).all()
     print(itemData)
     existItem = True
@@ -265,6 +267,7 @@ def editElements(elementId):
         itemData= itemData2[0]
     return render_template('addEditElement.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem)
+
 @admin.route("/pujar/<int:elementId>")
 def pujar(elementId):
     if 'email' not in session:
@@ -275,10 +278,42 @@ def pujar(elementId):
     products = Elementos.query.filter(
         Elementos.id == elementId
     ).all()
+    itemData = Elementos.query.filter(
+            Elementos.trocador == session['id']
+        ).all()
     totalPrice = 0
     print(products)
+    print("itemData")
+    print(itemData)
     existItem = False
     if noOfItems > 0:
         existItem = True
-    return render_template("pujar.html", products = products, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+    return render_template("pujar.html", products = products,misElementos = itemData, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
 
+@admin.route("/savePuja", methods=["GET", "POST"])
+def savePuja():
+    if request.method == "POST":
+
+        print("request.form")
+        print(request.form['prujaId'])
+        print(request.form['ofertaId'])
+
+        el = Trueque(
+            elemento_oferta=request.form['elemento_oferta'],
+            elemento_puja=request.form['elemento_puja'],
+            usuario_ofertador=request.form['usuario_ofertador'],
+            usuario_trocador=session['usuario_trocador']
+        )
+        nuevo_trueque= Trueques(
+            elemento_oferta=el.get_elemento_oferta(),
+            elemento_puja=el.get_elemento_puja(),
+            usuario_ofertador=el.get_usuario_ofertador(),
+            usuario_trocador=el.get_usuario_trocador()
+        )
+        # Elementos.insertar(nuevo_usuario)
+        db.session.add(nuevo_trueque)
+        db.session.commit()
+
+        db.session.commit()
+        flash("puja enviada correctamente")
+    return redirect(url_for('admin.root'))
