@@ -46,7 +46,7 @@ class Trueques(db.Model):
 
     # Relationships
     usuario_pujador: int = db.Column(db.Integer, db.ForeignKey('elementos.id'))
-    usuario_ofeertador: int = db.Column(db.Integer, db.ForeignKey('elementos.id'))
+    usuario_ofertador: int = db.Column(db.Integer, db.ForeignKey('elementos.id'))
 
     estado: str = db.Column(db.String(50), unique=True, nullable=False, default="iniciado")
     elemento_puja: int = db.Column(db.Integer, unique=True)
@@ -58,7 +58,7 @@ class Trueques(db.Model):
                               onupdate=datetime.datetime.now)
 
     puja = db.relationship("Elementos", foreign_keys=[usuario_pujador])
-    oferta = db.relationship("Elementos", foreign_keys=[usuario_ofeertador])
+    oferta = db.relationship("Elementos", foreign_keys=[usuario_ofertador])
 
     solicitud_logistica = db.relationship('SolicitudLogistica', cascade='all, delete, delete-orphan')
 
@@ -99,15 +99,16 @@ class Notificaciones(db.Model):
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     mensaje: str = db.Column(db.String(150), unique=True, nullable=False)
 
-    usuario_pujador: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    usuario_ofeertador: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    usuario: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    url: str = db.Column(db.String(150), nullable=False)
+    estado: str = db.Column(db.String(150), nullable=False)
 
     created_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
                                      onupdate=datetime.datetime.now)
 
-    pujador = db.relationship("Usuarios", foreign_keys=[usuario_pujador])
-    ofeertador = db.relationship("Usuarios", foreign_keys=[usuario_ofeertador])
+    fk_pujador = db.relationship("Usuarios", foreign_keys=[usuario])
+
 
 
 
