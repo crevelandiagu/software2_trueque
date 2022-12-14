@@ -11,23 +11,24 @@ from flask_sqlalchemy import SQLAlchemy
 from app.admin.usuario import Usuario
 from app.admin.elemento import Elemento
 from app.admin.trueque import Trueque
+from app.admin.notificacion import Notificacion
 
 db = SQLAlchemy()
 admin = Blueprint('admin', __name__)
 
 @admin.route('/')
 def root():
-    loggedIn, firstName, noOfItems = getLoginDetails()
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
     itemData = Elementos.query.filter(
         Elementos.trocador != session.get('id',-1),
-        Elementos.estado != 'sin-asignar'
+        Elementos.estado == 'sin-asignar'
     ).all()
 
     if len(itemData) > 9:
         itemData = itemData[0:9]
         print(itemData)
-    return render_template('index.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+    return render_template('index.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
 
     # return render_template('index.html', itemData=[], loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=[])
 
@@ -98,30 +99,6 @@ def register():
         except Exception as e:
             print(e)
             return {"mensaje": f"Error {e}"}
-
-        # try:
-        #     existe = Usuarios.query.filter(Usuarios.email == request.form['email']).first()
-        #     if existe is not None:
-        #         error = "El usuario ya existe, pruebe con otro"
-        #         return render_template('login.html', error=error)
-        #
-        #     nuevo_usuario = Usuarios(
-        #         nombre=request.form['nombre'],
-        #         email=request.form['email'],
-        #         contrasena=request.form['password'],
-        #         departamento=request.form['departamento'],
-        #         municipio=request.form['municipio'],
-        #         direccion=request.form['direccion']
-        #     )
-        #
-        #     db.session.add(nuevo_usuario)
-        #     db.session.commit()
-        #     flash("Registered Successfully")
-        # except Exception as e:
-        #     print(e)
-        #     return {"mensaje": f"Error {e}"}
-        #
-
         return redirect(url_for('admin.root'))
 
 @admin.route("/profile")
@@ -134,6 +111,8 @@ def profileForm():
 @admin.route("/logout")
 def logout():
     session.pop('email', None)
+    session.pop('id', None)
+    session.clear()
     return redirect(url_for('admin.root'))
 
 
@@ -143,6 +122,7 @@ def getLoginDetails():
         loggedIn = False
         firstName = ''
         noOfItems = 0
+        notMessages = []
     else:
         print(session['email'])
         loggedIn = True
@@ -151,25 +131,34 @@ def getLoginDetails():
             loggedIn = False
             firstName = ''
             noOfItems = 0
+            notMessages = []
         else:
             firstName = usuario.nombre
             print("usuario")
             print(usuario)
-            notificacion = Notificaciones.query.filter(Notificaciones.usuario_pujador == usuario.id).first()
-            noOfItems = 3 # notificaciones futuras
+            notificacion = Notificaciones.query.filter(
+                Notificaciones.usuario == session['id'],
+                Notificaciones.estado == 'enviado'
+            ).all()
 
-    return (loggedIn, firstName, noOfItems)
+            noOfItems = len(notificacion)
+            notMessages = notificacion
+
+            print("notMessages")
+            print(list(notMessages))
+
+    return (loggedIn, firstName, noOfItems, notMessages)
 
 
 
 @admin.route("/add")
 def add():
-    loggedIn, firstName, noOfItems = getLoginDetails()
-    return render_template('addEditElement.html', categories=list(),  loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
+    return render_template('addEditElement.html', categories=list(),  loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
 
 @admin.route('/myElements')
 def myElements():
-    loggedIn, firstName, noOfItems = getLoginDetails()
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
     itemData = Elementos.query.filter(
             Elementos.trocador == session['id'],
@@ -183,7 +172,7 @@ def myElements():
         itemData = itemData[0:9]
         print(itemData)
     return render_template('elements.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
-                           noOfItems=noOfItems, existItem=existItem)
+                           noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
 @admin.route("/addElement", methods=["GET", "POST"])
 def addElement():
@@ -249,7 +238,7 @@ def saveElement():
 
 @admin.route('/editElement/<int:elementId>')
 def editElements(elementId):
-    loggedIn, firstName, noOfItems = getLoginDetails()
+    loggedIn, firstName, noOfItems,notMessages = getLoginDetails()
 
     itemData2 = Elementos.query.filter(
             Elementos.id == elementId
@@ -266,13 +255,14 @@ def editElements(elementId):
     else:
         itemData= itemData2[0]
     return render_template('addEditElement.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
-                           noOfItems=noOfItems, existItem=existItem)
+                           noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
 @admin.route("/pujar/<int:elementId>")
+
 def pujar(elementId):
     if 'email' not in session:
         return redirect(url_for('loginForm'))
-    loggedIn, firstName, noOfItems = getLoginDetails()
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
     email = session['email']
 
     products = Elementos.query.filter(
@@ -286,32 +276,142 @@ def pujar(elementId):
     print("itemData")
     print(itemData)
     existItem = False
-    if noOfItems > 0:
+    if len(itemData) > 0:
         existItem = True
-    return render_template("pujar.html", products = products,misElementos = itemData, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems)
+    print("existItem")
+    print(existItem)
+    return render_template("pujar.html", products = products,misElementos = itemData, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
 
 @admin.route("/savePuja", methods=["GET", "POST"])
 def savePuja():
     if request.method == "POST":
 
         print("request.form")
-        print(request.form['prujaId'])
-        print(request.form['ofertaId'])
+        print(request.form)
 
         el = Trueque(
             elemento_oferta=request.form['elemento_oferta'],
             elemento_puja=request.form['elemento_puja'],
             usuario_ofertador=request.form['usuario_ofertador'],
-            usuario_trocador=session['usuario_trocador']
+            usuario_pujador=session['id']
         )
-        nuevo_trueque= Trueques(
+
+        db.session.query(Elementos).filter(Elementos.id == request.form['elemento_oferta']) \
+            .update({
+            Elementos.estado: 'proceso'
+        }, synchronize_session=False)
+        db.session.commit()
+
+        db.session.query(Elementos).filter(Elementos.id == request.form['elemento_puja']) \
+            .update({
+            Elementos.estado: 'proceso'
+        }, synchronize_session=False)
+        db.session.commit()
+
+        nuevo_trueque = Trueques(
             elemento_oferta=el.get_elemento_oferta(),
             elemento_puja=el.get_elemento_puja(),
             usuario_ofertador=el.get_usuario_ofertador(),
-            usuario_trocador=el.get_usuario_trocador()
+            usuario_pujador=el.get_usuario_pujador()
         )
         # Elementos.insertar(nuevo_usuario)
         db.session.add(nuevo_trueque)
         db.session.commit()
+
+        obj_notificacion = Notificacion(
+            mensaje='Ha recibido una solicitud de oferta, para ver mas diríjase a mis ofertas',
+            estado='enviado',
+            usuario_ofertador=request.form['usuario_ofertador'],
+            usuario_pujador=session['id']
+        )
+
+        nuevo_notificacion = Notificaciones(
+            mensaje=obj_notificacion.get_mensaje(),
+            estado=obj_notificacion.get_estado(),
+            usuario=obj_notificacion.get_usuario_ofertador(),
+            url='myOferts'
+        )
+        # Elementos.insertar(nuevo_usuario)
+        db.session.add(nuevo_notificacion)
+        db.session.commit()
+
         flash("puja enviada correctamente")
     return redirect(url_for('admin.root'))
+
+@admin.route('/myOferts')
+def myOferts():
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
+
+    itemData = Trueques.query.filter(
+        Trueques.usuario_ofertador == session['id'],
+        Trueques.estado == 'iniciado'
+    ).all()
+    result_dict = [u.__dict__ for u in itemData]
+    print("session['id']")
+    print(session['id'])
+    print("result_dict")
+
+    print(result_dict)
+
+    for x in range(len(result_dict)):
+        print("x")
+        print(x)
+        result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
+                Elementos.id == result_dict[x]['elemento_puja']
+            ).first()
+        result_dict[x]['elemento_oferta_propiedades'] = Elementos.query.filter(
+                Elementos.id == result_dict[x]['elemento_oferta']
+            ).first()
+        usuario_pujador_nombre = Usuarios.query.filter(
+            Usuarios.id == result_dict[x]['usuario_pujador']
+        ).first()
+        result_dict[x]['usuario_pujador_nombre'] = usuario_pujador_nombre.nombre
+
+
+    existItem = True
+    if len(itemData) == 0:
+        existItem = False
+    else:
+        itemData = itemData[0:9]
+        print(itemData)
+    return render_template('misOfertas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
+                           noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)\
+#
+# @admin.route('/myOferts')
+# def myOferts():
+#     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
+#
+#     itemData = Trueques.query.filter(
+#         Trueques.usuario_ofertador == session['id'],
+#         Trueques.estado == 'iniciado'
+#     ).all()
+#     result_dict = [u.__dict__ for u in itemData]
+#     print("session['id']")
+#     print(session['id'])
+#     print("result_dict")
+#
+#     print(result_dict)
+#
+#     for x in range(len(result_dict)):
+#         print("x")
+#         print(x)
+#         result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
+#                 Elementos.id == result_dict[x]['elemento_puja']
+#             ).first()
+#         result_dict[x]['elemento_oferta_propiedades'] = Elementos.query.filter(
+#                 Elementos.id == result_dict[x]['elemento_oferta']
+#             ).first()
+#         usuario_pujador_nombre = Usuarios.query.filter(
+#             Usuarios.id == result_dict[x]['usuario_pujador']
+#         ).first()
+#         result_dict[x]['usuario_pujador_nombre'] = usuario_pujador_nombre.nombre
+#
+#
+#     existItem = True
+#     if len(itemData) == 0:
+#         existItem = False
+#     else:
+#         itemData = itemData[0:9]
+#         print(itemData)
+#     return render_template('misOfertas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
+#                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
