@@ -9,13 +9,13 @@ class Trueque:
                  elemento_puja=None,
                  estado=None,
                  usuario_ofertador=None,
-                 usuario_trocador=None
+                 usuario_pujador=None
                  ):
         self.__elemento_oferta = elemento_oferta
         self.__elemento_puja = elemento_puja
         self.__estado = estado
         self.__usuario_ofertador = usuario_ofertador
-        self.__usuario_trocador = usuario_trocador
+        self.__usuario_pujador = usuario_pujador
 
     def get_elemento_oferta (self):
         return self.__elemento_oferta
@@ -29,8 +29,8 @@ class Trueque:
     def get_usuario_ofertador(self):
         return self.__usuario_ofertador
 
-    def get_usuario_trocador(self):
-        return self.__usuario_trocador
+    def get_usuario_pujador(self):
+        return self.__usuario_pujador
 
 
 
