@@ -269,10 +269,11 @@ def pujar(elementId):
     email = session['email']
 
     products = Elementos.query.filter(
-        Elementos.id == elementId
+        Elementos.id == elementId,
     ).all()
     itemData = Elementos.query.filter(
-            Elementos.trocador == session['id']
+            Elementos.trocador == session['id'],
+            Elementos.estado == 'sin-asignar'
         ).all()
     totalPrice = 0
     print(products)
@@ -380,6 +381,45 @@ def myOferts():
         print(itemData)
     return render_template('misOfertas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
+
+@admin.route('/myPujas')
+def myPujas():
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
+
+    itemData = Trueques.query.filter(
+        Trueques.usuario_pujador == session['id'],
+        Trueques.estado == 'iniciado'
+    ).all()
+    result_dict = [u.__dict__ for u in itemData]
+
+    print("result_dict")
+    print(result_dict)
+
+    for x in range(len(result_dict)):
+        print("x")
+        print(x)
+        result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
+                Elementos.id == result_dict[x]['elemento_puja']
+            ).first()
+        result_dict[x]['elemento_oferta_propiedades'] = Elementos.query.filter(
+                Elementos.id == result_dict[x]['elemento_oferta']
+            ).first()
+        usuario_pujador_nombre = Usuarios.query.filter(
+            Usuarios.id == result_dict[x]['usuario_pujador']
+        ).first()
+        result_dict[x]['usuario_pujador_nombre'] = usuario_pujador_nombre.nombre
+        result_dict[x]['usuario_pujador_id'] = usuario_pujador_nombre.id
+
+
+    existItem = True
+    if len(itemData) == 0:
+        existItem = False
+    else:
+        itemData = itemData[0:9]
+        print(itemData)
+    return render_template('misPujas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
+                           noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
+
 
 @admin.route('/saveTrueque', methods=["GET", "POST"])
 def saveTrueque():
@@ -517,3 +557,56 @@ def saveLogistica():
 
         flash("Logistica Actualizada correctamente")
     return redirect(url_for('admin.Logisticas'))
+
+@admin.route('/myTrueques')
+def myTrueques():
+    loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
+
+    solicitudes_logisticas_query = list(SolicitudesLogisticas.query.all())
+    itemData = list()
+
+    db.session.query(Notificaciones) \
+        .filter(Notificaciones.usuario == session['id'], Notificaciones.url == 'myTrueques') \
+        .update({
+        Notificaciones.estado: 'leido'
+    }, synchronize_session=False)
+    db.session.commit()
+
+    for x in range(len(solicitudes_logisticas_query)):
+        Trueques_query = Trueques.query.filter(
+            Trueques.id == solicitudes_logisticas_query[x].trueque
+        ).first()
+        usuario_pujador = Usuarios.query.filter(
+            Usuarios.id == Trueques_query.usuario_pujador
+        ).first()
+        usuario_ofertador = Usuarios.query.filter(
+            Usuarios.id == Trueques_query.usuario_ofertador
+        ).first()
+        elemeto_pujador = Elementos.query.filter(
+            Elementos.id == Trueques_query.elemento_puja
+        ).first()
+        elemeto_ofertado = Elementos.query.filter(
+            Elementos.id == Trueques_query.elemento_oferta
+        ).first()
+
+        itemData.append(
+            {
+                'id': x,
+                'puja_nombre': usuario_pujador.nombre,
+                'puja_elemento': elemeto_pujador.nombre,
+                'ofertado_nombre': usuario_ofertador.nombre,
+                'ofertado_elemento': elemeto_ofertado.nombre,
+                'cobro': "10.000",
+                'estado': solicitudes_logisticas_query[x].estado
+            }
+        )
+    print(itemData)
+
+    existItem = True
+    if len(itemData) == 0:
+        existItem = False
+    else:
+        itemData = itemData[0:9]
+        print(itemData)
+    return render_template('trueques.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
+                           noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)

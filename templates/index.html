@@ -64,42 +64,40 @@
     </div>
     <div class="album py-5 bg-light">
         <div class="container">
-
-            <div class="row">
-                {% for data in itemData %}
-                <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm">
-                        <!--<svg class="bd-placeholder-img card-img-top" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail">-->
-                            <!--<title>Placeholder</title>-->
-                        <!--</svg>-->
-                        <div id="images">
-                                <div id="image">
-                                    <img src={{url_for('static', filename='uploads/' + data.imagen_url) }} id="itemImage" style="width: 100%;height: 90%;"/>
-                                </div>
-                            </div>
-                        <div class="card-body">
-                            <h4 class="card-text text-danger">{{data.nombre}}</h4>
-                            <div id="description">
-                                <p class="card-text text-muted">{{data.descripcion}}</p>
-                            </div>
-                            <h6 class="card-text text-muted">Stock: 1</h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                {% if loggedIn %}
-                                    <div class="btn-group">
-                                        <a type="button" class="btn btn-sm btn-outline-danger" href="/pujar/{{data.id}}"><i class="bi bi-shuffle"></i> Pujar</a>
+            {% if  loggedIn != 'Operador Logistico' %}
+                <div class="row">
+                    {% for data in itemData %}
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <!--<svg class="bd-placeholder-img card-img-top" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail">-->
+                                <!--<title>Placeholder</title>-->
+                            <!--</svg>-->
+                            <div id="images">
+                                    <div id="image">
+                                        <img src={{url_for('static', filename='uploads/' + data.imagen_url) }} id="itemImage" style="width: 100%;height: 90%;"/>
                                     </div>
-                                {% endif %}
+                                </div>
+                            <div class="card-body">
+                                <h4 class="card-text text-danger">{{data.nombre}}</h4>
+                                <div id="description">
+                                    <p class="card-text text-muted">{{data.descripcion}}</p>
+                                </div>
+                                <h6 class="card-text text-muted">Stock: 1</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    {% if loggedIn %}
+                                        <div class="btn-group">
+                                            <a type="button" class="btn btn-sm btn-outline-danger" href="/pujar/{{data.id}}"><i class="bi bi-shuffle"></i> Pujar</a>
+                                        </div>
+                                    {% endif %}
 
-                                <p class="text-danger" style="font-size:150%">COP {{data.precio_estimado}}</p>
+                                    <p class="text-danger" style="font-size:150%">COP {{data.precio_estimado}}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-
-
-
+            {% endif %}
         </div>
     </div>
 {% endblock %}

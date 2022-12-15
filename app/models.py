@@ -100,7 +100,7 @@ class Notificaciones(db.Model):
     __tablename__ = 'notificaciones'
 
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    mensaje: str = db.Column(db.String(150), unique=True, nullable=False)
+    mensaje: str = db.Column(db.String(150), nullable=False)
 
     usuario: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     url: str = db.Column(db.String(150), nullable=False)
