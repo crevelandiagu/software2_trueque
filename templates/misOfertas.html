@@ -46,134 +46,76 @@
 {% block content %}
     <div class="container">
         <div class="jumbotron bg-light">
-            <form class="form-signin" action="/savePuja" method="POST">
-                <h3 class="lead">A continuacion elementos propuestos para intercambio</h3>
-                <div class="row">
-                    <div class="col-md-5">
-                        <a class="btn btn-outline-danger" href="/" role="button">cancelar</a>
-                    </div>
-                </div>
-            </form>
+                <h2>A continuacion ofertas por revisar</h2>
         </div>
     </div>
     {% if existItem %}
     <div class="album py-5 bg-light">
         <div class="container">
             {% for i in range(itemData|length) %}
-                <div class="row">
-                    <div class="col-md-8">
-                        <p><b>{{itemData[i].usuario_pujador_nombre}}</b> te esta pidiendo el intercambio de:</p>
+                <form class="form-signin" action="/saveTrueque" method="POST">
+                    <input id="trueque_id" name="trueque_id" type="hidden" value="{{itemData[i].id}}">
+                    <input id="elemento_puja_propiedades_nombre" name="elemento_puja_propiedades_nombre" type="hidden"
+                           value="{{itemData[i].elemento_puja_propiedades.nombre}}">
+                    <input id="elemento_puja_propiedades_imagen_url" name="elemento_puja_propiedades_imagen_url" type="hidden"
+                           value="{{itemData[i].elemento_puja_propiedades.imagen_url}}">
+                    <input id="elemento_oferta_propiedades_nombre" name="elemento_oferta_propiedades_nombre" type="hidden"
+                           value="{{itemData[i].elemento_oferta_propiedades.nombre}}">
+                    <input id="elemento_oferta_propiedades_imagen_url" name="elemento_oferta_propiedades_imagen_url" type="hidden"
+                           value="{{itemData[i].elemento_oferta_propiedades.imagen_url}}">
+                    <input id="usuario_pujador_id" name="usuario_pujador_id" type="hidden"
+                           value="{{itemData[i].usuario_pujador_id}}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p><b>{{itemData[i].usuario_pujador_nombre}}</b> te esta pidiendo el intercambio de:</p>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card mb-4 shadow-sm" >
-                            <div id="images">
-                                    <div id="image">
-                                        <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_puja_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4 shadow-sm" >
+                                <div id="images">
+                                        <div id="image">
+                                            <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_puja_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
+                                        </div>
+                                    </div>
+                                <div class="card-body">
+                                    <h4 class="card-text text-danger">{{itemData[i].elemento_puja_propiedades.nombre}}</h4>
+                                    <h6 class="card-text text-muted">{{itemData[i].elemento_puja_propiedades.descripcion}}</h6>
+                                    <h6 class="card-text text-muted">× {{itemData[i].elemento_puja_propiedades[4]}}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" class="btn btn-info" disabled>Elemento que se te oferta</button>
+                                        <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_puja_propiedades.precio_estimado}}</p>
                                     </div>
                                 </div>
-                            <div class="card-body">
-                                <h4 class="card-text text-danger">{{itemData[i].elemento_puja_propiedades.nombre}}</h4>
-                                <h6 class="card-text text-muted">{{itemData[i].elemento_puja_propiedades.descripcion}}</h6>
-                                <h6 class="card-text text-muted">× {{itemData[i].elemento_puja_propiedades[4]}}</h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <button type="button" class="btn btn-dark" disabled>Elemento que se te oferta</button>
-                                    <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_puja_propiedades.precio_estimado}}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4 shadow-sm" >
+                                <div id="images">
+                                        <div id="image">
+                                            <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_oferta_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
+                                        </div>
+                                    </div>
+                                <div class="card-body">
+                                    <h4 class="card-text text-danger">{{itemData[i].elemento_oferta_propiedades.nombre}}</h4>
+                                    <h6 class="card-text text-muted">{{itemData[i].elemento_oferta_propiedades.descripcion}}</h6>
+                                    <h6 class="card-text text-muted">× {{itemData[i].elemento_oferta_propiedades[4]}}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" class="btn btn-info" disabled>Tu elemento a intercambiar</button>
+                                        <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_oferta_propiedades.precio_estimado}}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card mb-4 shadow-sm" >
-                            <div id="images">
-                                    <div id="image">
-                                        <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_oferta_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
-                                    </div>
-                                </div>
-                            <div class="card-body">
-                                <h4 class="card-text text-danger">{{itemData[i].elemento_oferta_propiedades.nombre}}</h4>
-                                <h6 class="card-text text-muted">{{itemData[i].elemento_oferta_propiedades.descripcion}}</h6>
-                                <h6 class="card-text text-muted">× {{itemData[i].elemento_oferta_propiedades[4]}}</h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <button type="button" class="btn btn-dark" disabled>Tu elemento a intercambiar</button>
-                                    <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_oferta_propiedades.precio_estimado}}</p>
-                                </div>
-                            </div>
+                      <div class="row">
+                        <div class="col-md-8">
+                            <button class="btn btn-danger" type="submit"><i class="bi bi-shuffle"></i> Aceptar trueque</button>
+                            <button class="btn btn-secondary" type="submit" disabled><i class="bi bi-x-circle"></i> Rechazar trueque</button>
                         </div>
                     </div>
-                </div>
-                  <div class="row">
-                    <div class="col-md-8">
-                        <button type="button" class="btn btn-danger"><i class="bi bi-shuffle"></i> Aceptar trueque</button>
-{#                        <p>{{itemData[i].usuario_pujador_nombre}} te esta pidiendo el intercambio de:</p>#}
-                    </div>
-                </div>
+                </form>
             {% endfor %}
-
-{#            <div class="row">#}
-{#                {% for data in products %}#}
-{#                <div class="col-md-3">#}
-{#                    <div class="card mb-4 shadow-sm" style="opacity: 0.5;">#}
-{#                        <div id="images">#}
-{#                                <div id="image">#}
-{#                                    <img src="{{url_for('static', filename='uploads/' + data.imagen_url) }}"  style="width: 100%;" id="itemImage"/>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        <div class="card-body">#}
-{#                            <h4 class="card-text text-danger">{{data.nombre}}</h4>#}
-{#                            <h6 class="card-text text-muted">{{data.descripcion}}</h6>#}
-{#                            <h6 class="card-text text-muted">× {{data[4]}}</h6>#}
-{#                            <div class="d-flex justify-content-between align-items-center">#}
-{#                                <p> </p>#}
-{#                                <p class="text-danger" style="font-size:150%">cop {{data.precio_estimado}}</p>#}
-{#                            </div>#}
-{#                            <div class="d-flex justify-content-between align-items-center">#}
-{#                                <button type="button" class="btn btn-outline-secondary" disabled>Elemento a pujar</button>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                {% endfor %}#}
-{#                <div class="col-md-9 myelements">#}
-{#                    <div class="row">#}
-{#                        {% for data2 in misElementos %}#}
-{#                        <div class="col-md-3">#}
-{#                            <form class="form-signin" action="/savePuja" method="POST">#}
-{#                                <input id="elemento_puja" name="elemento_puja" type="hidden" value="{{data2.id}}">#}
-{#                                <input id="elemento_oferta" name="elemento_oferta" type="hidden" value="{{products[0].id}}">#}
-{#                                <input id="usuario_ofertador" name="usuario_ofertador" type="hidden" value="{{products[0].trocador}}">#}
-{#                                <div class="card mb-4 shadow-sm">#}
-{#                                    <div id="images">#}
-{#                                            <div id="image">#}
-{#                                                <img src="{{url_for('static', filename='uploads/' + data2.imagen_url) }}"  style="width: 100%;" id="itemImage"/>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    <div class="card-body">#}
-{#                                        <h4 class="card-text text-danger">{{data2.nombre}}</h4>#}
-{#                                        <h6 class="card-text text-muted">{{data2.descripcion}}</h6>#}
-{#                                        <h6 class="card-text text-muted">× {{data[4]}}</h6>#}
-{#                                        <div class="d-flex justify-content-between align-items-center">#}
-{#                                            <p> </p>#}
-{#                                            <p class="text-danger" style="font-size:150%">cop {{data2.precio_estimado}}</p>#}
-{#                                        </div>#}
-{#                                        <div class="d-flex justify-content-between align-items-center">#}
-{#                                        <button type="submit" class="btn btn-danger" >#}
-{#                                            <i class="bi bi-shuffle"></i> Intercambiar#}
-{#                                        </button>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </form>#}
-{#                        </div>#}
-{##}
-{##}
-{#                        {% endfor %}#}
-{#                    </div>#}
-{#                </div>#}
-{##}
-{#            </div>#}
-
         </div>
     </div>
 
