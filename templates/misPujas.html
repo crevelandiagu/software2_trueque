@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block head %}
+<style>
+    #images{
+        display:flex;
+        flex-direction:row;
+    }
+
+    #image{
+        width:380px;
+        height:280px;
+        overflow:hidden;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    .container{
+        max-width: 1520px;
+    }
+    body {
+        min-height: 75rem;
+    }
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    @media (min-width: 576px) {
+        .jumbotron {
+            padding: 1rem 2rem;
+        }
+    }
+    @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+    }
+    .myelements{
+        background-color: #f5f5f5d4;
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="jumbotron bg-light">
+                <h2>A continuacion pujas existentes</h2>
+                <p>Cuando el usuario ofertado acepte el intercambio debes seguir el estado del trueque en <a href="/myTrueques">Mis Trueques</a></p>
+        </div>
+    </div>
+    {% if existItem %}
+    <div class="album py-5 bg-light">
+        <div class="container">
+            {% for i in range(itemData|length) %}
+                    <input id="trueque_id" name="trueque_id" type="hidden" value="{{itemData[i].id}}">
+                    <input id="elemento_puja_propiedades_nombre" name="elemento_puja_propiedades_nombre" type="hidden"
+                           value="{{itemData[i].elemento_puja_propiedades.nombre}}">
+                    <input id="elemento_puja_propiedades_imagen_url" name="elemento_puja_propiedades_imagen_url" type="hidden"
+                           value="{{itemData[i].elemento_puja_propiedades.imagen_url}}">
+                    <input id="elemento_oferta_propiedades_nombre" name="elemento_oferta_propiedades_nombre" type="hidden"
+                           value="{{itemData[i].elemento_oferta_propiedades.nombre}}">
+                    <input id="elemento_oferta_propiedades_imagen_url" name="elemento_oferta_propiedades_imagen_url" type="hidden"
+                           value="{{itemData[i].elemento_oferta_propiedades.imagen_url}}">
+                    <input id="usuario_pujador_id" name="usuario_pujador_id" type="hidden"
+                           value="{{itemData[i].usuario_pujador_id}}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p><b> tu estas pidiendo el intercambio de:</b></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4 shadow-sm" >
+                                <div id="images">
+                                        <div id="image">
+                                            <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_oferta_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
+                                        </div>
+                                    </div>
+                                <div class="card-body">
+                                    <h4 class="card-text text-danger">{{itemData[i].elemento_oferta_propiedades.nombre}}</h4>
+                                    <h6 class="card-text text-muted">{{itemData[i].elemento_oferta_propiedades.descripcion}}</h6>
+                                    <h6 class="card-text text-muted">× {{itemData[i].elemento_oferta_propiedades[4]}}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" class="btn btn-info" disabled>Tu elemento a intercambiar</button>
+                                        <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_oferta_propiedades.precio_estimado}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="col-md-4">
+                            <div class="card mb-4 shadow-sm" >
+                                <div id="images">
+                                        <div id="image">
+                                            <img src="{{url_for('static', filename='uploads/' + itemData[i].elemento_puja_propiedades.imagen_url) }}"  style="width: 100%;" id="itemImage"/>
+                                        </div>
+                                    </div>
+                                <div class="card-body">
+                                    <h4 class="card-text text-danger">{{itemData[i].elemento_puja_propiedades.nombre}}</h4>
+                                    <h6 class="card-text text-muted">{{itemData[i].elemento_puja_propiedades.descripcion}}</h6>
+                                    <h6 class="card-text text-muted">× {{itemData[i].elemento_puja_propiedades[4]}}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" class="btn btn-info" disabled>Elemento que ofertaste</button>
+                                        <p class="text-danger" style="font-size:150%">cop {{itemData[i].elemento_puja_propiedades.precio_estimado}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% else %}
+
+    {% endif %}
+<div class="modal fade" id="narratModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Realizar puja</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+          </div>
+          <div class="modal-body">
+            <p>Esta seguro que desea confirmar la puja del elemento ?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger">Aceptar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/validateForm.js') }}"></script>
