@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block head %}
+<style>
+    #images{
+        display:flex;
+        flex-direction:row;
+    }
+
+    #image{
+        width:380px;
+        height:380px;
+        overflow:hidden;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+
+    }
+    .container{
+        max-width: 1520px;
+    }
+    body {
+        min-height: 75rem;
+    }
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+    }
+
+    #description {
+        overflow:hidden;
+        text-overflow: ellipsis;
+        height:80px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="container">
+    </div>
+    {% if existItem %}
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-5">
+                    <div class="card">
+                      <div class="card-body mx-4">
+                        <div class="container">
+                          <p class="my-5 mx-5" style="font-size: 30px;">Gracias por tu trueque</p>
+                          <div class="row">
+                              <div class="col-xl-8">
+                                  <span class="badge badge-pill badge-secondary">Invoice  #12345</span>
+                              </div>
+                              <div class="col-xl-4">
+                                  <b>{{itemData.fecha}}</b>
+                              </div>
+
+                            <hr>
+                            <div class="col-xl-9">
+                              <p>{{itemData.elemento_puja_propiedades_nombre}}</p>
+                            </div>
+                            <div class="col-xl-3">
+                              <p class="float-end">x  1ud
+                              </p>
+                            </div>
+                            <hr>
+                          </div>
+                          <div class="row">
+                            <div class="col-xl-9">
+                              <p>{{itemData.elemento_oferta_propiedades_nombre}}</p>
+                            </div>
+                            <div class="col-xl-3">
+                              <p class="float-end">x  1ud
+                              </p>
+                            </div>
+                            <hr>
+                          </div>
+                          <div class="row">
+                            <div class="col-xl-9">
+                              <p>Envio colombia estandar</p>
+                            </div>
+                            <div class="col-xl-3">
+                              <p class="float-end">$10.000
+                              </p>
+                            </div>
+                            <hr style="border: 2px solid black;">
+                          </div>
+                          <div class="row text-black">
+
+                            <div class="col-xl-12" style="text-align: right !important;">
+                              <span class="badge badge-pill badge-dark">Total: $10.000</span>
+                            </div>
+                            <hr style="border: 2px solid black;">
+                          </div>
+                          <div class="text-center" style="margin-top: 90px;">
+                              <button type="button" class="btn btn-info" onclick="javascript:window.print()"><i class="bi bi-printer"></i>Imprimir</button>
+                            <p>trueques tundama derechos reservados</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    {% endif %}
+{% endblock %}

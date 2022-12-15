@@ -10,10 +10,11 @@ class Usuarios(db.Model):
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre: str = db.Column(db.String(150), nullable=False)
     email: str = db.Column(db.String(150), unique=True, nullable=False)
-    contrasena: str = db.Column(db.String(250), nullable=False,  unique=True,)
+    contrasena: str = db.Column(db.String(250), nullable=False)
     departamento: str = db.Column(db.String(150), nullable=False)
     municipio: str = db.Column(db.String(150), nullable=False)
     direccion: str = db.Column(db.String(150), nullable=False)
+    role: str = db.Column(db.String(150), nullable=False, default="Trocador")
     # Relationships
     # elemento = db.relationship('Elementos', cascade='all, delete, delete-orphan')
     # notificacion = db.relationship('Notificaciones', cascade='all, delete, delete-orphan')
@@ -24,7 +25,8 @@ class Usuarios(db.Model):
                  contrasena=None,
                  departamento=None,
                  municipio=None,
-                 direccion=None):
+                 direccion=None,
+                 role=None):
         self.id = id
         self.nombre = nombre
         self.email = email
@@ -32,6 +34,7 @@ class Usuarios(db.Model):
         self.departamento = departamento
         self.municipio = municipio
         self.direccion = direccion
+        self.role = role
 
     def insertar(self):
         db.session.add(self.__init__)

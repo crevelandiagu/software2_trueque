@@ -32,6 +32,7 @@ cors = CORS(app)
 for url, blueprint in ACTIVATE_ENDPOINTS:
     app.register_blueprint(blueprint, url_prefix=url)
 
+# dummy_data.insert_dummy_data(app)
 
 
 
