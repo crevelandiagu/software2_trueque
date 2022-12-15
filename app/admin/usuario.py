@@ -10,13 +10,15 @@ class Usuario:
                  contrasena=None,
                  departamento=None,
                  municipio=None,
-                 direccion=None):
+                 direccion=None,
+                 role=None):
         self.__nombre = nombre
         self.__email = email
         self.__contrasena = contrasena
         self.__departamento = departamento
         self.__municipio = municipio
         self.__direccion = direccion
+        self.__role = role
 
     def get_nombre(self):
         return self.__nombre
@@ -35,6 +37,9 @@ class Usuario:
 
     def get_direccion(self):
         return self.__direccion
+
+    def get_role(self):
+        return self.__role
 
     def encriptar_clave(self, contrasena):
         if self.__contrasena != contrasena:
