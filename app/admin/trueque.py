@@ -32,6 +32,10 @@ class Trueque:
     def get_usuario_pujador(self):
         return self.__usuario_pujador
 
+    def procesar_trueque(self):
+        pass
+
+
 
 
 
