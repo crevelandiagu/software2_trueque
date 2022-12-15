@@ -112,6 +112,7 @@ def profileForm():
 def logout():
     session.pop('email', None)
     session.pop('id', None)
+    session.pop('role', None)
     session.clear()
     return redirect(url_for('admin.root'))
 
