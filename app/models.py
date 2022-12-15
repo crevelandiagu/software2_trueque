@@ -4,7 +4,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 db = SQLAlchemy()
 
 
-class Usuarios(db.Model):
+class UsuariosMapper(db.Model):
 
     __tablename__ = 'usuarios'
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -41,7 +41,7 @@ class Usuarios(db.Model):
         db.session.commit()
 
 
-class Trueques(db.Model):
+class TruequesMapper(db.Model):
 
     __tablename__ = 'trueques'
 
@@ -60,13 +60,13 @@ class Trueques(db.Model):
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
                               onupdate=datetime.datetime.now)
 
-    puja = db.relationship("Elementos", foreign_keys=[usuario_pujador])
-    oferta = db.relationship("Elementos", foreign_keys=[usuario_ofertador])
+    puja = db.relationship("ElementosMapper", foreign_keys=[usuario_pujador])
+    oferta = db.relationship("ElementosMapper", foreign_keys=[usuario_ofertador])
 
-    solicitud_logistica = db.relationship('SolicitudLogistica', cascade='all, delete, delete-orphan')
+    solicitud_logistica = db.relationship('SolicitudLogisticaMapper', cascade='all, delete, delete-orphan')
 
 
-class Elementos(db.Model):
+class ElementosMapper(db.Model):
 
     __tablename__ = 'elementos'
 
@@ -82,7 +82,7 @@ class Elementos(db.Model):
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
                                      onupdate=datetime.datetime.now)
 
-class SolicitudLogistica(db.Model):
+class SolicitudLogisticaMapper(db.Model):
 
     __tablename__ = 'solicitud_logistica'
 
@@ -95,7 +95,7 @@ class SolicitudLogistica(db.Model):
                                      onupdate=datetime.datetime.now)
 
 
-class Notificaciones(db.Model):
+class NotificacionesMapper(db.Model):
 
     __tablename__ = 'notificaciones'
 
@@ -110,7 +110,7 @@ class Notificaciones(db.Model):
     updated_at: datetime = db.Column(db.DateTime, default=datetime.datetime.now,
                                      onupdate=datetime.datetime.now)
 
-    fk_pujador = db.relationship("Usuarios", foreign_keys=[usuario])
+    fk_pujador = db.relationship("UsuariosMapper", foreign_keys=[usuario])
 
 
 
@@ -118,6 +118,6 @@ class Notificaciones(db.Model):
 
 class UsuarioSchema(SQLAlchemyAutoSchema):
     class Meta:
-        model = Usuarios
+        model = UsuariosMapper
         include_relationships = True
         load_instance = True

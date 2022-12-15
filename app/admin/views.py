@@ -5,8 +5,11 @@ from flask import session
 from flask import redirect
 from flask import url_for, flash
 
-from app.models import Usuarios, Elementos, Trueques, SolicitudLogistica as SolicitudesLogisticas
-from app.models import Notificaciones
+from app.models import UsuariosMapper
+from app.models import ElementosMapper
+from app.models import TruequesMapper
+from app.models import SolicitudLogisticaMapper as SolicitudesLogisticasMapper
+from app.models import NotificacionesMapper
 from flask_sqlalchemy import SQLAlchemy
 from app.admin.usuario import Usuario
 from app.admin.elemento import Elemento
@@ -23,9 +26,9 @@ admin = Blueprint('admin', __name__)
 def root():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    itemData = Elementos.query.filter(
-        Elementos.trocador != session.get('id',-1),
-        Elementos.estado == 'sin-asignar'
+    itemData = ElementosMapper.query.filter(
+        ElementosMapper.trocador != session.get('id',-1),
+        ElementosMapper.estado == 'sin-asignar'
     ).all()
 
     if len(itemData) > 9:
@@ -41,9 +44,9 @@ def login():
             email=request.form['inputEmail'],
             contrasena=request.form['inputPassword']
         )
-        usuario = Usuarios.query.filter(
-            Usuarios.email == us.get_email(),
-            Usuarios.contrasena == us.validar_hash()
+        usuario = UsuariosMapper.query.filter(
+            UsuariosMapper.email == us.get_email(),
+            UsuariosMapper.contrasena == us.validar_hash()
         ).first()
         db.session.commit()
 
@@ -83,7 +86,7 @@ def register():
 
             password = usuario.encriptar_clave(request.form['cpassword'])
 
-            nuevo_usuario = Usuarios(
+            nuevo_usuario = UsuariosMapper(
                     nombre=usuario.get_nombre(),
                     email=usuario.get_email(),
                     contrasena=password,
@@ -127,7 +130,7 @@ def getLoginDetails():
     else:
 
         loggedIn = session['role']
-        usuario = Usuarios.query.filter(Usuarios.email == session['email']).first()
+        usuario = UsuariosMapper.query.filter(UsuariosMapper.email == session['email']).first()
         if usuario is None:
             loggedIn = False
             firstName = ''
@@ -135,9 +138,9 @@ def getLoginDetails():
             notMessages = []
         else:
             firstName = usuario.nombre
-            notificacion = Notificaciones.query.filter(
-                Notificaciones.usuario == session['id'],
-                Notificaciones.estado == 'enviado'
+            notificacion = NotificacionesMapper.query.filter(
+                NotificacionesMapper.usuario == session['id'],
+                NotificacionesMapper.estado == 'enviado'
             ).all()
 
             noOfItems = len(notificacion)
@@ -160,9 +163,9 @@ def add():
 def myElements():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    itemData = Elementos.query.filter(
-            Elementos.trocador == session['id'],
-            Elementos.estado == 'sin-asignar'
+    itemData = ElementosMapper.query.filter(
+            ElementosMapper.trocador == session['id'],
+            ElementosMapper.estado == 'sin-asignar'
         ).all()
 
     existItem = True
@@ -189,7 +192,7 @@ def addElement():
             trocador=session['id']
             )
 
-        nuevo_elemento = Elementos(
+        nuevo_elemento = ElementosMapper(
             nombre=el.get_nombre(),
             precio_estimado=el.get_precio_estimado(),
             descripcion=el.get_descripcion(),
@@ -216,15 +219,15 @@ def saveElement():
             imagen_url = request.files['imagen_url'],
             trocador=session['id']
             )
-        db.session.query(Elementos)\
-            .filter(Elementos.id == request.form['id'])\
+        db.session.query(ElementosMapper)\
+            .filter(ElementosMapper.id == request.form['id'])\
             .update({
-                Elementos.nombre:el.get_nombre(),
-                Elementos.precio_estimado:el.get_precio_estimado(),
-                Elementos.descripcion:el.get_descripcion(),
-                Elementos.imagen_url:el.get_imagen_url(),
-                Elementos.categoria:el.get_categoria(),
-                Elementos.trocador:el.get_trocador()
+                ElementosMapper.nombre:el.get_nombre(),
+                ElementosMapper.precio_estimado:el.get_precio_estimado(),
+                ElementosMapper.descripcion:el.get_descripcion(),
+                ElementosMapper.imagen_url:el.get_imagen_url(),
+                ElementosMapper.Mappercategoria:el.get_categoria(),
+                ElementosMapper.trocador:el.get_trocador()
         }, synchronize_session=False)
         db.session.commit()
         flash("Elemento editado correctamente")
@@ -234,8 +237,8 @@ def saveElement():
 def editElements(elementId):
     loggedIn, firstName, noOfItems,notMessages = getLoginDetails()
 
-    itemData2 = Elementos.query.filter(
-            Elementos.id == elementId
+    itemData2 = ElementosMapper.query.filter(
+            ElementosMapper.id == elementId
     ).all()
     db.session.commit()
 
@@ -257,12 +260,12 @@ def pujar(elementId):
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
     email = session['email']
 
-    products = Elementos.query.filter(
-        Elementos.id == elementId,
+    products = ElementosMapper.query.filter(
+        ElementosMapper.id == elementId,
     ).all()
-    itemData = Elementos.query.filter(
-            Elementos.trocador == session['id'],
-            Elementos.estado == 'sin-asignar'
+    itemData = ElementosMapper.query.filter(
+            ElementosMapper.trocador == session['id'],
+            ElementosMapper.estado == 'sin-asignar'
         ).all()
     totalPrice = 0
 
@@ -291,19 +294,19 @@ def savePuja():
             usuario_pujador=session['id']
         )
 
-        db.session.query(Elementos).filter(Elementos.id == request.form['elemento_oferta']) \
+        db.session.query(ElementosMapper).filter(ElementosMapper.id == request.form['elemento_oferta']) \
             .update({
-            Elementos.estado: 'proceso'
+            ElementosMapper.estado: 'proceso'
         }, synchronize_session=False)
         db.session.commit()
 
-        db.session.query(Elementos).filter(Elementos.id == request.form['elemento_puja']) \
+        db.session.query(ElementosMapper).filter(ElementosMapper.id == request.form['elemento_puja']) \
             .update({
-            Elementos.estado: 'proceso'
+            ElementosMapper.estado: 'proceso'
         }, synchronize_session=False)
         db.session.commit()
 
-        nuevo_trueque = Trueques(
+        nuevo_trueque = TruequesMapper(
             elemento_oferta=el.get_elemento_oferta(),
             elemento_puja=el.get_elemento_puja(),
             usuario_ofertador=el.get_usuario_ofertador(),
@@ -320,7 +323,7 @@ def savePuja():
             usuario_pujador=session['id']
         )
 
-        nuevo_notificacion = Notificaciones(
+        nuevo_notificacion = NotificacionesMapper(
             mensaje=obj_notificacion.get_mensaje(),
             estado=obj_notificacion.get_estado(),
             usuario=obj_notificacion.get_usuario_ofertador(),
@@ -337,23 +340,23 @@ def savePuja():
 def myOferts():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    itemData = Trueques.query.filter(
-        Trueques.usuario_ofertador == session['id'],
-        Trueques.estado == 'iniciado'
+    itemData = TruequesMapper.query.filter(
+        TruequesMapper.usuario_ofertador == session['id'],
+        TruequesMapper.estado == 'iniciado'
     ).all()
     result_dict = [u.__dict__ for u in itemData]
 
 
     for x in range(len(result_dict)):
 
-        result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
-                Elementos.id == result_dict[x]['elemento_puja']
+        result_dict[x]['elemento_puja_propiedades'] = ElementosMapper.query.filter(
+                ElementosMapper.id == result_dict[x]['elemento_puja']
             ).first()
-        result_dict[x]['elemento_oferta_propiedades'] = Elementos.query.filter(
-                Elementos.id == result_dict[x]['elemento_oferta']
+        result_dict[x]['elemento_oferta_propiedades'] = ElementosMapper.query.filter(
+                ElementosMapper.id == result_dict[x]['elemento_oferta']
             ).first()
-        usuario_pujador_nombre = Usuarios.query.filter(
-            Usuarios.id == result_dict[x]['usuario_pujador']
+        usuario_pujador_nombre = UsuariosMapper.query.filter(
+            UsuariosMapper.id == result_dict[x]['usuario_pujador']
         ).first()
         result_dict[x]['usuario_pujador_nombre'] = usuario_pujador_nombre.nombre
         result_dict[x]['usuario_pujador_id'] = usuario_pujador_nombre.id
@@ -372,23 +375,23 @@ def myOferts():
 def myPujas():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    itemData = Trueques.query.filter(
-        Trueques.usuario_pujador == session['id'],
-        Trueques.estado == 'iniciado'
+    itemData = TruequesMapper.query.filter(
+        TruequesMapper.usuario_pujador == session['id'],
+        TruequesMapper.estado == 'iniciado'
     ).all()
     result_dict = [u.__dict__ for u in itemData]
 
 
     for x in range(len(result_dict)):
 
-        result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
-                Elementos.id == result_dict[x]['elemento_puja']
+        result_dict[x]['elemento_puja_propiedades'] = ElementosMapper.query.filter(
+                ElementosMapper.id == result_dict[x]['elemento_puja']
             ).first()
-        result_dict[x]['elemento_oferta_propiedades'] = Elementos.query.filter(
-                Elementos.id == result_dict[x]['elemento_oferta']
+        result_dict[x]['elemento_oferta_propiedades'] = ElementosMapper.query.filter(
+                ElementosMapper.id == result_dict[x]['elemento_oferta']
             ).first()
-        usuario_pujador_nombre = Usuarios.query.filter(
-            Usuarios.id == result_dict[x]['usuario_pujador']
+        usuario_pujador_nombre = UsuariosMapper.query.filter(
+            UsuariosMapper.id == result_dict[x]['usuario_pujador']
         ).first()
         result_dict[x]['usuario_pujador_nombre'] = usuario_pujador_nombre.nombre
         result_dict[x]['usuario_pujador_id'] = usuario_pujador_nombre.id
@@ -409,16 +412,16 @@ def saveTrueque():
     if request.method == "POST":
 
 
-        db.session.query(Trueques).filter(Trueques.id == request.form['trueque_id']) \
+        db.session.query(TruequesMapper).filter(TruequesMapper.id == request.form['trueque_id']) \
             .update({
-            Trueques.estado: 'proceso'
+            TruequesMapper.estado: 'proceso'
         }, synchronize_session=False)
         db.session.commit()
 
-        db.session.query(Notificaciones)\
-            .filter(Notificaciones.usuario == session['id'], Notificaciones.url == 'myOferts')\
+        db.session.query(NotificacionesMapper)\
+            .filter(NotificacionesMapper.usuario == session['id'], NotificacionesMapper.url == 'myOferts')\
             .update({
-            Notificaciones.estado: 'leido'
+            NotificacionesMapper.estado: 'leido'
         }, synchronize_session=False)
         db.session.commit()
 
@@ -427,7 +430,7 @@ def saveTrueque():
             estado='iniciado',
             trueque=request.form['trueque_id']
         )
-        nueva_logistica = SolicitudesLogisticas(
+        nueva_logistica = SolicitudesLogisticasMapper(
             operador_logistico=obj_solicitud_logistica.get_operador_logistico(),
             estado=obj_solicitud_logistica.get_estado(),
             trueque=obj_solicitud_logistica.get_trueque()
@@ -443,7 +446,7 @@ def saveTrueque():
             usuario_pujador=request.form['usuario_pujador_id']
         )
 
-        nuevo_notificacion = Notificaciones(
+        nuevo_notificacion = NotificacionesMapper(
             mensaje=obj_notificacion.get_mensaje(),
             estado=obj_notificacion.get_estado(),
             usuario=obj_notificacion.get_usuario_pujador(),
@@ -480,20 +483,20 @@ def myInvoice():
 def Logisticas():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    solicitudes_logisticas_query = list(SolicitudesLogisticas.query.all())
+    solicitudes_logisticas_query = list(SolicitudesLogisticasMapper.query.all())
 
     itemData = list()
 
 
     for x in range(len(solicitudes_logisticas_query)):
-        Trueques_query = Trueques.query.filter(
-            Trueques.id == solicitudes_logisticas_query[x].trueque
+        Trueques_query = TruequesMapper.query.filter(
+            TruequesMapper.id == solicitudes_logisticas_query[x].trueque
         ).first()
-        usuario_pujador = Usuarios.query.filter(
-            Usuarios.id == Trueques_query.usuario_pujador
+        usuario_pujador = UsuariosMapper.query.filter(
+            UsuariosMapper.id == Trueques_query.usuario_pujador
         ).first()
-        usuario_ofertador = Usuarios.query.filter(
-            Usuarios.id == Trueques_query.usuario_ofertador
+        usuario_ofertador = UsuariosMapper.query.filter(
+            UsuariosMapper.id == Trueques_query.usuario_ofertador
         ).first()
 
         itemData.append(
@@ -529,9 +532,10 @@ def saveLogistica():
             numero_solicitud = request.form['id']
         )
 
-        db.session.query(SolicitudesLogisticas).filter(SolicitudesLogisticas.id == obj_solicitud_logistica.get_numero_solicitud()) \
+        db.session.query(SolicitudesLogisticasMapper).\
+            filter(SolicitudesLogisticasMapper.id == obj_solicitud_logistica.get_numero_solicitud()) \
             .update({
-            SolicitudesLogisticas.estado: obj_solicitud_logistica.get_estado()
+            SolicitudesLogisticasMapper.estado: obj_solicitud_logistica.get_estado()
         }, synchronize_session=False)
         db.session.commit()
 
@@ -542,31 +546,31 @@ def saveLogistica():
 def myTrueques():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
 
-    solicitudes_logisticas_query = list(SolicitudesLogisticas.query.all())
+    solicitudes_logisticas_query = list(SolicitudesLogisticasMapper.query.all())
     itemData = list()
 
-    db.session.query(Notificaciones) \
-        .filter(Notificaciones.usuario == session['id'], Notificaciones.url == 'myTrueques') \
+    db.session.query(NotificacionesMapper) \
+        .filter(NotificacionesMapper.usuario == session['id'], NotificacionesMapper.url == 'myTrueques') \
         .update({
-        Notificaciones.estado: 'leido'
+        NotificacionesMapper.estado: 'leido'
     }, synchronize_session=False)
     db.session.commit()
 
     for x in range(len(solicitudes_logisticas_query)):
-        Trueques_query = Trueques.query.filter(
-            Trueques.id == solicitudes_logisticas_query[x].trueque
+        Trueques_query = TruequesMapper.query.filter(
+            TruequesMapper.id == solicitudes_logisticas_query[x].trueque
         ).first()
-        usuario_pujador = Usuarios.query.filter(
-            Usuarios.id == Trueques_query.usuario_pujador
+        usuario_pujador = UsuariosMapper.query.filter(
+            UsuariosMapper.id == Trueques_query.usuario_pujador
         ).first()
-        usuario_ofertador = Usuarios.query.filter(
-            Usuarios.id == Trueques_query.usuario_ofertador
+        usuario_ofertador = UsuariosMapper.query.filter(
+            UsuariosMapper.id == Trueques_query.usuario_ofertador
         ).first()
-        elemeto_pujador = Elementos.query.filter(
-            Elementos.id == Trueques_query.elemento_puja
+        elemeto_pujador = ElementosMapper.query.filter(
+            ElementosMapper.id == Trueques_query.elemento_puja
         ).first()
-        elemeto_ofertado = Elementos.query.filter(
-            Elementos.id == Trueques_query.elemento_oferta
+        elemeto_ofertado = ElementosMapper.query.filter(
+            ElementosMapper.id == Trueques_query.elemento_oferta
         ).first()
 
         itemData.append(
