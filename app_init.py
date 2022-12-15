@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from app.admin import admin
 from app.models import db
-import dummy_data
+
 from flask_bootstrap import Bootstrap
 ACTIVATE_ENDPOINTS = (('/', admin),)
 
@@ -31,10 +31,5 @@ cors = CORS(app)
 
 for url, blueprint in ACTIVATE_ENDPOINTS:
     app.register_blueprint(blueprint, url_prefix=url)
-
-try:
-    dummy_data.insert_dummy_data(app)
-except Exception as e:
-    pass
 
 
