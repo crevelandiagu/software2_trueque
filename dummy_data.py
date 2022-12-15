@@ -1,13 +1,13 @@
 from app_init import app
 
-from app.models import Elementos, Usuarios
+from app.models import ElementosMapper, UsuariosMapper
 from app.models import db
 
 def insert_dummy_data():
 
     with app.app_context():
         us = [[
-            'juan perez', 'asistente-logistico@gmail.com', '1317dfa6a0c51245a1fbd37c6de9819ac469d2e5f71f70a42eec6c6181a30fa7', 'Cundinamarca', 'logistico', 'logistico','Operador Logistico'
+            'juan perez', 'logistico@gmail.com', '1317dfa6a0c51245a1fbd37c6de9819ac469d2e5f71f70a42eec6c6181a30fa7', 'Cundinamarca', 'logistico', 'logistico','Operador Logistico'
         ],[
             'polo', 'polo@polo.com', '1317dfa6a0c51245a1fbd37c6de9819ac469d2e5f71f70a42eec6c6181a30fa7', 'Cundinamarca', 'polo', 'calle 46 # 24-12','Trocador'
         ], [
@@ -15,7 +15,7 @@ def insert_dummy_data():
         ]]
         for x in us:
             print(x)
-            nuevo_usuario = Usuarios(
+            nuevo_usuario = UsuariosMapper(
                 nombre=x[0],
                 email=x[1],
                 contrasena=x[2],
@@ -45,7 +45,7 @@ def insert_dummy_data():
         for x in el:
             print(x)
 
-            nuevo_elemento = Elementos(
+            nuevo_elemento = ElementosMapper(
                 nombre=x[0],
                 precio_estimado=x[4],
                 descripcion=x[1],
