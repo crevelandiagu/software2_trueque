@@ -9,11 +9,13 @@ class Elemento:
                  imagen_url=None,
                  categoria=None,
                  precio_estimado=None,
+                 estado=None,
                  trocador=None):
         self.__nombre = nombre
+        self.__categoria = categoria
         self.__descripcion = descripcion
         self.__imagen_url = self.cargar_imagen(imagen_url)
-        self.__categoria = categoria
+        self.__estado = estado
         self.__precio_estimado= precio_estimado
         self.__trocador = trocador
 

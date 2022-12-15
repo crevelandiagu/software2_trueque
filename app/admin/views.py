@@ -30,10 +30,8 @@ def root():
 
     if len(itemData) > 9:
         itemData = itemData[0:9]
-        print(itemData)
     return render_template('index.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
 
-    # return render_template('index.html', itemData=[], loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=[])
 
 @admin.route("/login", methods = ['POST', 'GET'])
 def login():
@@ -53,8 +51,6 @@ def login():
             session['email'] = usuario.email
             session['id'] = usuario.id
             session['role'] = usuario.role
-            print("session['id']")
-            print(session['id'])
 
             return redirect(url_for('admin.root'))
         else:
@@ -95,10 +91,10 @@ def register():
                     municipio=usuario.get_municipio(),
                     direccion=usuario.get_direccion())
 
-            # Usuarios.insertar(nuevo_usuario)
+
             db.session.add(nuevo_usuario)
             db.session.commit()
-            #
+
             flash("Registered Successfully")
         except Exception as e:
             print(e)
@@ -128,7 +124,7 @@ def getLoginDetails():
         noOfItems = 0
         notMessages = []
     else:
-        print(session['email'])
+
         loggedIn = session['role']
         usuario = Usuarios.query.filter(Usuarios.email == session['email']).first()
         if usuario is None:
@@ -138,8 +134,6 @@ def getLoginDetails():
             notMessages = []
         else:
             firstName = usuario.nombre
-            print("usuario")
-            print(usuario)
             notificacion = Notificaciones.query.filter(
                 Notificaciones.usuario == session['id'],
                 Notificaciones.estado == 'enviado'
@@ -148,16 +142,18 @@ def getLoginDetails():
             noOfItems = len(notificacion)
             notMessages = notificacion
 
-            print("notMessages")
-            print(list(notMessages))
-
     return (loggedIn, firstName, noOfItems, notMessages)
 
 
 @admin.route("/add")
 def add():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
-    return render_template('addEditElement.html', categories=list(),  loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
+    return render_template('addEditElement.html',
+                           categories=list(),
+                           loggedIn=loggedIn,
+                           firstName=firstName,
+                           noOfItems=noOfItems,
+                           notMessages=notMessages)
 
 @admin.route('/myElements')
 def myElements():
@@ -167,13 +163,13 @@ def myElements():
             Elementos.trocador == session['id'],
             Elementos.estado == 'sin-asignar'
         ).all()
-    print(itemData)
+
     existItem = True
     if len(itemData) == 0:
         existItem = False
     else:
         itemData = itemData[0:9]
-        print(itemData)
+
     return render_template('elements.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
@@ -182,9 +178,6 @@ def addElement():
     if request.method == "POST":
 
         nombre = request.form['nombre']
-
-        print("session['id']")
-        print(session['id'])
 
         el = Elemento(
             nombre=request.form['nombre'],
@@ -213,9 +206,6 @@ def addElement():
 @admin.route("/saveElement", methods=["GET", "POST"])
 def saveElement():
     if request.method == "POST":
-
-        print("session['id']")
-        print(session['id'])
 
         el = Elemento(
             nombre=request.form['nombre'],
@@ -247,9 +237,7 @@ def editElements(elementId):
             Elementos.id == elementId
     ).all()
     db.session.commit()
-    print('aqui')
-    print(elementId)
-    print(itemData2)
+
 
     existItem = True
     if len(itemData2) == 0:
@@ -276,22 +264,24 @@ def pujar(elementId):
             Elementos.estado == 'sin-asignar'
         ).all()
     totalPrice = 0
-    print(products)
-    print("itemData")
-    print(itemData)
+
     existItem = False
     if len(itemData) > 0:
         existItem = True
-    print("existItem")
-    print(existItem)
-    return render_template("pujar.html", products = products,misElementos = itemData, totalPrice=totalPrice, existItem=existItem, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, notMessages=notMessages)
+
+    return render_template("pujar.html",
+                           products = products,
+                           misElementos = itemData,
+                           totalPrice=totalPrice,
+                           existItem=existItem,
+                           loggedIn=loggedIn,
+                           firstName=firstName,
+                           noOfItems=noOfItems,
+                           notMessages=notMessages)
 
 @admin.route("/savePuja", methods=["GET", "POST"])
 def savePuja():
     if request.method == "POST":
-
-        print("request.form")
-        print(request.form)
 
         el = Trueque(
             elemento_oferta=request.form['elemento_oferta'],
@@ -318,7 +308,7 @@ def savePuja():
             usuario_ofertador=el.get_usuario_ofertador(),
             usuario_pujador=el.get_usuario_pujador()
         )
-        # Elementos.insertar(nuevo_usuario)
+
         db.session.add(nuevo_trueque)
         db.session.commit()
 
@@ -335,7 +325,7 @@ def savePuja():
             usuario=obj_notificacion.get_usuario_ofertador(),
             url='myOferts'
         )
-        # Elementos.insertar(nuevo_usuario)
+
         db.session.add(nuevo_notificacion)
         db.session.commit()
 
@@ -351,15 +341,10 @@ def myOferts():
         Trueques.estado == 'iniciado'
     ).all()
     result_dict = [u.__dict__ for u in itemData]
-    print("session['id']")
-    print(session['id'])
-    print("result_dict")
 
-    print(result_dict)
 
     for x in range(len(result_dict)):
-        print("x")
-        print(x)
+
         result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
                 Elementos.id == result_dict[x]['elemento_puja']
             ).first()
@@ -378,7 +363,7 @@ def myOferts():
         existItem = False
     else:
         itemData = itemData[0:9]
-        print(itemData)
+
     return render_template('misOfertas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
@@ -392,12 +377,9 @@ def myPujas():
     ).all()
     result_dict = [u.__dict__ for u in itemData]
 
-    print("result_dict")
-    print(result_dict)
 
     for x in range(len(result_dict)):
-        print("x")
-        print(x)
+
         result_dict[x]['elemento_puja_propiedades'] = Elementos.query.filter(
                 Elementos.id == result_dict[x]['elemento_puja']
             ).first()
@@ -416,7 +398,7 @@ def myPujas():
         existItem = False
     else:
         itemData = itemData[0:9]
-        print(itemData)
+
     return render_template('misPujas.html', itemData=result_dict, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
@@ -424,8 +406,7 @@ def myPujas():
 @admin.route('/saveTrueque', methods=["GET", "POST"])
 def saveTrueque():
     if request.method == "POST":
-        print("request.form")
-        print(request.form)
+
 
         db.session.query(Trueques).filter(Trueques.id == request.form['trueque_id']) \
             .update({
@@ -486,8 +467,6 @@ def myInvoice():
     loggedIn, firstName, noOfItems, notMessages = getLoginDetails()
     itemData = request.args['itemData']
 
-    print("itemData myInvoice")
-    print(itemData)
 
     existItem = True
     if len(itemData) == 0:
@@ -523,19 +502,19 @@ def Logisticas():
                 'puja_direccion': usuario_pujador.direccion,
                 'ofertado_nombre': usuario_ofertador.nombre,
                 'ofertado_direccion': usuario_ofertador.direccion,
-                # 'cobro': solicitudes_logisticas_query[x]["precio_puja"],
+
                 'cobro': "10.000",
                 'estado': solicitudes_logisticas_query[x].estado
             }
         )
-    print(itemData)
+
 
     existItem = True
     if len(itemData) == 0:
         existItem = False
     else:
         itemData = itemData[0:9]
-        print(itemData)
+
     return render_template('logistica.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
 
@@ -600,13 +579,13 @@ def myTrueques():
                 'estado': solicitudes_logisticas_query[x].estado
             }
         )
-    print(itemData)
+
 
     existItem = True
     if len(itemData) == 0:
         existItem = False
     else:
         itemData = itemData[0:9]
-        print(itemData)
+
     return render_template('trueques.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName,
                            noOfItems=noOfItems, existItem=existItem, notMessages=notMessages)
