@@ -53,24 +53,3 @@ class Usuario:
         m = hashlib.sha256()
         m.update(bytes(self.__contrasena, encoding='utf-8'))
         return m.hexdigest()
-
-
-
-
-    # def set_nombre(self, nombre):
-    #     self.__nombre = nombre
-    #
-    # def set_email(self, email):
-    #     self.__email = email
-    #
-    # def set_contrasena(self, contrasena):
-    #     self.__contrasena = contrasena
-    #
-    # def set_departamento(self, departamento):
-    #     self.__departamento = departamento
-    #
-    # def set_municipio(self, municipio):
-    #     self.__municipio = municipio
-    #
-    # def set_direccion(self, direccion):
-    #     self.__direccion = direccion
